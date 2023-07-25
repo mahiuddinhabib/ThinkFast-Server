@@ -6,6 +6,7 @@
 
 #define PORT 12345
 #define MAX_CLIENTS 5
+#define MAX_BUFFER_SIZE 1024
 
 void *handle_client(void *client_socket_void);
 
@@ -85,11 +86,12 @@ int main()
 void *handle_client(void *client_socket_void)
 {
     SOCKET client_socket = *((SOCKET *)client_socket_void);
-    char buffer[1024];
+    char buffer[MAX_BUFFER_SIZE];
     int bytes_received;
 
     // Receive email from client
-    bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
+    char email[50];
+    bytes_received = recv(client_socket, email, sizeof(email), 0);
     if (bytes_received == SOCKET_ERROR || bytes_received == 0)
     {
         perror("Email receiving failed");
@@ -98,11 +100,12 @@ void *handle_client(void *client_socket_void)
     }
 
     // Print the received email
-    printf("%s\n", buffer);
+
+    printf("%s\n", email);
 
     // Send a file destination to the client
-    char message[1024];
-    printf("Enter the string to send to the client: ");
+    char message[MAX_BUFFER_SIZE];
+    printf("Enter the file destination: ");
     fgets(message, sizeof(message), stdin);
     message[strcspn(message, "\n")] = '\0'; // Remove the newline character
 
@@ -113,19 +116,19 @@ void *handle_client(void *client_socket_void)
         return NULL;
     }
 
-    // Receive a number from the client
+    // Receive the total score from the client
     bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
     if (bytes_received == SOCKET_ERROR || bytes_received == 0)
     {
-        perror("Number receiving failed");
+        perror("Score receiving failed");
         closesocket(client_socket);
         return NULL;
     }
     buffer[bytes_received] = '\0';
-    int number_from_client = atoi(buffer);
+    int received_score = atoi(buffer);
 
     // Process the received number (you can implement your logic here)
-    printf("Received number: %d\n", number_from_client);
+    printf("Total score of %s = %d\n", email, received_score);
 
     // Send another number to the client
     int number_to_send = 42;
