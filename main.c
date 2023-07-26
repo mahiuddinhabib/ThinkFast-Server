@@ -8,6 +8,14 @@
 #define MAX_CLIENTS 5
 #define MAX_BUFFER_SIZE 1024
 
+// Function to get the current time in seconds
+double get_current_time()
+{
+    return (double)clock() / CLOCKS_PER_SEC;
+}
+
+double start_time;
+
 void *handle_client(void *client_socket_void);
 
 int main()
@@ -52,6 +60,9 @@ int main()
     }
 
     printf("Server is listening on port %d...\n", PORT);
+
+    // Set current time as start time
+    start_time = get_current_time();
 
     while (1)
     {
@@ -100,7 +111,6 @@ void *handle_client(void *client_socket_void)
     }
 
     // Print the received email
-
     printf("%s\n", email);
 
     // Send a file destination to the client
@@ -116,8 +126,20 @@ void *handle_client(void *client_socket_void)
         return NULL;
     }
 
-    //Here I want to continuously receive 10 numbers from client
-    int no_mcq=10;
+    // Send time limit to the client
+    int time_limit = 100;
+    int remaining_time = time_limit - (get_current_time() - start_time);
+
+    sprintf(buffer, "%d", remaining_time);
+    if (send(client_socket, buffer, strlen(buffer), 0) == SOCKET_ERROR)
+    {
+        perror("Time limit sending failed");
+        closesocket(client_socket);
+        return NULL;
+    }
+
+    // continuously receive updated score from client
+    int no_mcq = 10;
     while (no_mcq--)
     {
         bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
@@ -129,6 +151,10 @@ void *handle_client(void *client_socket_void)
         }
         buffer[bytes_received] = '\0';
         int onScore = atoi(buffer);
+        if (onScore == -1)
+        {
+            break;
+        }
         printf("onScore of %s: %d\n", email, onScore);
     }
 
