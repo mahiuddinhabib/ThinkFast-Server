@@ -1,3 +1,4 @@
+// build command: gcc main.c -o server.exe -lws2_32
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,12 +115,12 @@ void *handle_client(void *client_socket_void)
     printf("%s\n", email);
 
     // Send a file destination to the client
-    char message[MAX_BUFFER_SIZE];
-    printf("Enter the file destination: ");
-    fgets(message, sizeof(message), stdin);
-    message[strcspn(message, "\n")] = '\0'; // Remove the newline character
+    char filename[MAX_BUFFER_SIZE] = "database\\question_bank\\primary\\primary_level_1.txt";
+    // printf("Enter the file destination: ");
+    // fgets(filename, sizeof(filename), stdin);
+    // filename[strcspn(filename, "\n")] = '\0'; // Remove the newline character
 
-    if (send(client_socket, message, strlen(message), 0) == SOCKET_ERROR)
+    if (send(client_socket, filename, strlen(filename), 0) == SOCKET_ERROR)
     {
         perror("File destination sending failed");
         closesocket(client_socket);
@@ -127,10 +128,10 @@ void *handle_client(void *client_socket_void)
     }
 
     // Send time limit to the client
-    int time_limit = 100;
-    int remaining_time = time_limit - (get_current_time() - start_time);
+    int time_limit = 90;
+    // int remaining_time = time_limit - (get_current_time() - start_time);
 
-    sprintf(buffer, "%d", remaining_time);
+    sprintf(buffer, "%d", /* remaining_time */ time_limit);
     if (send(client_socket, buffer, strlen(buffer), 0) == SOCKET_ERROR)
     {
         perror("Time limit sending failed");
@@ -145,17 +146,17 @@ void *handle_client(void *client_socket_void)
         bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
         if (bytes_received == SOCKET_ERROR || bytes_received == 0)
         {
-            perror("OnScore receiving failed");
+            perror("uScore receiving failed");
             closesocket(client_socket);
             return NULL;
         }
         buffer[bytes_received] = '\0';
-        int onScore = atoi(buffer);
-        if (onScore == -1)
+        int uScore = atoi(buffer);
+        if (uScore == -1)
         {
             break;
         }
-        printf("onScore of %s: %d\n", email, onScore);
+        printf("uScore of %s: %d\n", email, uScore);
     }
 
     // Receive the total score from the client
@@ -172,12 +173,12 @@ void *handle_client(void *client_socket_void)
     // Process the received number (you can implement your logic here)
     printf("Total score of %s = %d\n", email, received_score);
 
-    // Send another number to the client
-    int number_to_send = 42;
-    sprintf(buffer, "%d", number_to_send);
+    // Send postion to the client
+    int position = -1;
+    sprintf(buffer, "%d", position);
     if (send(client_socket, buffer, strlen(buffer), 0) == SOCKET_ERROR)
     {
-        perror("Number sending failed");
+        perror("Position sending failed");
         closesocket(client_socket);
         return NULL;
     }
