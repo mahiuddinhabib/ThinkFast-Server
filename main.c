@@ -1,15 +1,19 @@
-// build command: gcc main.c -o server.exe -lws2_32
+// build command: gcc -o server.exe main.c quiz_select.c print_center.c -I include/ -lws2_32
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
 #include <pthread.h>
 #include <quiz_select.h>
+#include <print_center.h>
 
 #define PORT 12345
 #define MAX_CLIENTS 5
 #define MAX_BUFFER_SIZE 1024
 
+extern yCoord;
+int mIndx = 1;
+int tIndx = 0;
 char *file_name = NULL;
 
 // Function to get the current time in seconds
@@ -63,17 +67,28 @@ int main()
         return 1;
     }
 
-    printf("Server is listening on port %d...\n", PORT);
+    printCenter("+==================================+", &yCoord);
+    printCenter("|                                  |", &yCoord);
+    printCenter("|                                  |", &yCoord);
+    gotoxy(20 + 1, yCoord - 1);
+    printf("Server is listening on port %d\n", PORT);
+    printCenter("|                                  |", &yCoord);
+    printCenter("+==================================+", &yCoord);
 
-    
+    Sleep(3000);
+    system("cls");
+    yCoord = 3;
+
     file_name = quiz_select();
-    // printf("in main: %s\n", file_name);
+    system("cls");
+    yCoord = 3;
 
     // Set current time as start time
     start_time = get_current_time();
 
-    while (1)
+    while (mIndx)
     {
+        mIndx += 2;
         // Accept connection from an incoming client
         if ((client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len)) == INVALID_SOCKET)
         {
@@ -81,7 +96,12 @@ int main()
             return 1;
         }
 
-        printf("connected with ");
+        gotoxy(20, mIndx+2);
+        printf("+==========================================+");
+        gotoxy(20, mIndx+3);
+        printf("| connected with                           |");
+        gotoxy(20, mIndx+4);
+        printf("+==========================================+");
 
         // Create a new thread to handle the client
         pthread_t thread;
@@ -108,6 +128,9 @@ void *handle_client(void *client_socket_void)
     char buffer[MAX_BUFFER_SIZE];
     int bytes_received;
 
+    int tCoord = tIndx;
+    tIndx += 2;
+
     // Receive email from client
     char email[50];
     bytes_received = recv(client_socket, email, sizeof(email), 0);
@@ -119,6 +142,7 @@ void *handle_client(void *client_socket_void)
     }
 
     // Print the received email
+    gotoxy(20+17, mIndx + 1);
     printf("%s\n", email);
 
     // Send a file destination to the client
@@ -163,7 +187,12 @@ void *handle_client(void *client_socket_void)
         {
             break;
         }
-        printf("uScore of %s: %d\n", email, uScore);
+        gotoxy(20, tCoord + 17);
+        printf("+----------------------------------+");
+        gotoxy(20, tCoord + 18);
+        printf("|%-18s: scored %-7d|", email, uScore);
+        gotoxy(20, tCoord + 19);
+        printf("+----------------------------------+");
     }
 
     // Receive the total score from the client
@@ -178,20 +207,32 @@ void *handle_client(void *client_socket_void)
     int received_score = atoi(buffer);
 
     // Process the received number (you can implement your logic here)
-    printf("Total score of %s = %d\n", email, received_score);
-/* 
-    // Send postion to the client
-    int position = -1;
-    sprintf(buffer, "%d", position);
-    if (send(client_socket, buffer, strlen(buffer), 0) == SOCKET_ERROR)
-    {
-        perror("Position sending failed");
-        closesocket(client_socket);
-        return NULL;
-    }
- */
+    gotoxy(20, tCoord + 17);
+    printf("+----------------------------------+");
+    gotoxy(20, tCoord + 18);
+    printf("|%-18s: total score %-2d|", email, received_score);
+    gotoxy(20, tCoord + 19);
+    printf("+----------------------------------+");
+    // gotoxy(20, tCoord + 8);
+    /*
+        // Send postion to the client
+        int position = -1;
+        sprintf(buffer, "%d", position);
+        if (send(client_socket, buffer, strlen(buffer), 0) == SOCKET_ERROR)
+        {
+            perror("Position sending failed");
+            closesocket(client_socket);
+            return NULL;
+        }
+     */
     // Close the client socket and return
     closesocket(client_socket);
-    printf("%s is disconnected\n", email);
+    Sleep(2000);
+    gotoxy(20, tCoord + 17);
+    printf("+----------------------------------+");
+    gotoxy(20, tCoord + 18);
+    printf("|%-18s: disconnect   ", email);
+    gotoxy(20, tCoord + 19);
+    printf("+----------------------------------+");
     return NULL;
 }

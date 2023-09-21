@@ -10,7 +10,7 @@ char *quiz_select()
     int choice, category, level;
     do
     {
-        printCenter("====================================", &yCoord);
+        printCenter("+==================================+", &yCoord);
         printCenter("|       Select Quiz Category       |", &yCoord);
         printCenter("|==================================|", &yCoord);
         printCenter("| 1. Primary                       |", &yCoord);
@@ -20,7 +20,7 @@ char *quiz_select()
         printCenter("| Enter your choice (1-3):         |", &yCoord);
         printCenter("|==================================|", &yCoord);
         printCenter("| Enter level (1-10):              |", &yCoord);
-        printCenter("====================================", &yCoord);
+        printCenter("+==================================+", &yCoord);
 
         //  fflush(stdout);  // make sure the prompt is displayed before input is read
         gotoxy(20 + 27, yCoord - 4);
