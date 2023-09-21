@@ -4,10 +4,13 @@
 #include <string.h>
 #include <winsock2.h>
 #include <pthread.h>
+#include <quiz_select.h>
 
 #define PORT 12345
 #define MAX_CLIENTS 5
 #define MAX_BUFFER_SIZE 1024
+
+char *file_name = NULL;
 
 // Function to get the current time in seconds
 double get_current_time()
@@ -62,6 +65,10 @@ int main()
 
     printf("Server is listening on port %d...\n", PORT);
 
+    
+    file_name = quiz_select();
+    // printf("in main: %s\n", file_name);
+
     // Set current time as start time
     start_time = get_current_time();
 
@@ -115,12 +122,12 @@ void *handle_client(void *client_socket_void)
     printf("%s\n", email);
 
     // Send a file destination to the client
-    char filename[MAX_BUFFER_SIZE] = "database\\question_bank\\primary\\primary_level_1.txt";
+    // char filename[MAX_BUFFER_SIZE] = "database\\question_bank\\primary\\primary_level_1.txt";
     // printf("Enter the file destination: ");
     // fgets(filename, sizeof(filename), stdin);
     // filename[strcspn(filename, "\n")] = '\0'; // Remove the newline character
 
-    if (send(client_socket, filename, strlen(filename), 0) == SOCKET_ERROR)
+    if (send(client_socket, file_name, strlen(file_name), 0) == SOCKET_ERROR)
     {
         perror("File destination sending failed");
         closesocket(client_socket);
@@ -172,7 +179,7 @@ void *handle_client(void *client_socket_void)
 
     // Process the received number (you can implement your logic here)
     printf("Total score of %s = %d\n", email, received_score);
-
+/* 
     // Send postion to the client
     int position = -1;
     sprintf(buffer, "%d", position);
@@ -182,7 +189,7 @@ void *handle_client(void *client_socket_void)
         closesocket(client_socket);
         return NULL;
     }
-
+ */
     // Close the client socket and return
     closesocket(client_socket);
     printf("%s is disconnected\n", email);
